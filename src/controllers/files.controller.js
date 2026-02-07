@@ -30,7 +30,6 @@ async function getWorkspaceIfOwner(req, res, workspaceId) {
 export async function getFileOrList(req, res) {
   const { id: workspaceId } = req.params;
   const pathParam = req.query.path ?? '/';
-  console.log('Path in getFileOrList: ', pathParam, 'Workspace ID: ', workspaceId);
 
   const workspace = await getWorkspaceIfOwner(req, res, workspaceId);
   if (!workspace) return;

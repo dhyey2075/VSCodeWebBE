@@ -2,7 +2,7 @@ import fs from 'node:fs/promises';
 import path from 'node:path';
 import { normalizePath, isPathAllowed } from './path.guard.js';
 
-const WORKSPACES_BASE = process.env.WORKSPACES_DIR || path.join(process.cwd(), 'workspaces');
+const WORKSPACES_BASE = path.join(process.cwd(), process.env.WORKSPACES_DIR) || path.join(process.cwd(), 'workspaces');
 
 /**
  * Map workspace id + logical path to real filesystem path.
