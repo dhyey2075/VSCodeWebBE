@@ -96,8 +96,59 @@ export async function stopAndRemoveContainer(workspaceId) {
   }).eq('id', workspaceId);
 }
 
-export async function getContainer(workspaceId) {
+export async function getContainer(containerId) {
   const docker = new Docker();
-  const container = docker.getContainer(workspaceId);
-  return container;
+  return docker.getContainer(containerId);
+}
+
+/**
+ * Ensure workspace has a running container. Create and start if none; start if stopped.
+ * @returns {{ containerId: string, created: boolean }}
+ */
+export async function ensureWorkspaceContainer(workspaceId) {
+  const { data: workspaceData, error: workspaceError } = await supabase
+    .from('workspaces')
+    .select('containerId')
+    .eq('id', workspaceId)
+    .single();
+
+  if (workspaceError) throw new Error(workspaceError.message);
+
+  const docker = new Docker();
+
+  if (workspaceData.containerId) {
+    try {
+      const container = docker.getContainer(workspaceData.containerId);
+      const inspect = await container.inspect();
+      if (inspect.State.Running) {
+        return { containerId: workspaceData.containerId, created: false };
+      }
+      await container.start();
+      return { containerId: workspaceData.containerId, created: false };
+    } catch (e) {
+      if (e.statusCode === 404) {
+        const { error: clearError } = await supabase
+          .from('workspaces')
+          .update({ containerId: null, status: 'STOPPED' })
+          .eq('id', workspaceId);
+        if (clearError) throw new Error(clearError.message);
+        await startWorkspaceContainer(workspaceId);
+        const { data: updated } = await supabase
+          .from('workspaces')
+          .select('containerId')
+          .eq('id', workspaceId)
+          .single();
+        return { containerId: updated.containerId, created: true };
+      }
+      throw e;
+    }
+  }
+
+  await startWorkspaceContainer(workspaceId);
+  const { data: updated } = await supabase
+    .from('workspaces')
+    .select('containerId')
+    .eq('id', workspaceId)
+    .single();
+  return { containerId: updated.containerId, created: true };
 }

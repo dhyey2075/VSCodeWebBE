@@ -2,6 +2,7 @@ import { WebSocketServer } from 'ws';
 import { supabase } from '../config/supabase.js';
 import { routeMessage } from './ws.router.js';
 import * as terminalGateway from '../modules/terminal/terminal.gateway.js';
+import * as filesWs from '../modules/files/files.ws.js';
 
 export function attachWsServer(httpServer) {
   const wss = new WebSocketServer({ noServer: true });
@@ -50,10 +51,12 @@ export function attachWsServer(httpServer) {
 
     ws.on('close', () => {
       terminalGateway.destroySession(socketId);
+      filesWs.removeFileSubscriber(socketId);
     });
 
     ws.on('error', () => {
       terminalGateway.destroySession(socketId);
+      filesWs.removeFileSubscriber(socketId);
     });
   });
 

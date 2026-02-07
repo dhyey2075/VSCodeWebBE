@@ -22,6 +22,9 @@ export const authenticate = async (req, res, next) => {
         next();
     } catch (error) {
         console.error('Error in authenticate middleware: ', error);
+        if (error.message.includes('JWT has expired')) {
+            return res.status(401).json({ message: 'Unauthorized' });
+        }
         return res.status(500).json({ message: 'Internal server error' });
     }
 }

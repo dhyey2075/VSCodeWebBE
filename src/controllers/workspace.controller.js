@@ -13,10 +13,8 @@ export const getWorkspaces = async (req, res) => {
 };
 
 export const createWorkspace = async (req, res) => {
-    const { containerId } = req.body;
     const { error } = await supabase.from('workspaces').insert({
         ownerEmail: req.user.email,
-        containerId,
         status: 'CREATING',
         lastActiveAt: new Date(),
     });
