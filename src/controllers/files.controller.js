@@ -1,5 +1,6 @@
 import { supabase } from '../config/supabase.js';
 import * as vfs from '../lib/vfs.service.js';
+import { touchWorkspaceActivity } from '../lib/workspace.activity.js';
 
 /**
  * Load workspace and verify the current user owns it.
@@ -33,6 +34,8 @@ export async function getFileOrList(req, res) {
 
   const workspace = await getWorkspaceIfOwner(req, res, workspaceId);
   if (!workspace) return;
+
+  touchWorkspaceActivity(workspaceId);
 
   try {
     // Try as directory first
@@ -74,6 +77,8 @@ export async function writeFileHandler(req, res) {
 
   const workspace = await getWorkspaceIfOwner(req, res, workspaceId);
   if (!workspace) return;
+
+  touchWorkspaceActivity(workspaceId);
 
   const content = typeof req.body === 'string' ? req.body : req.body?.content;
   if (content === undefined) {
