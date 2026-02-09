@@ -19,7 +19,7 @@
     "dockerode": "^4.0.9",
     "dotenv": "^17.2.4",
     "express": "^5.2.1",
-    "node-pty": "^1.1.0",
+    "node-pty": "^0.10.1",
     "ws": "^8.19.0"
   },
   "devDependencies": {
